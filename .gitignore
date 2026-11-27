@@ -18,3 +18,7 @@ local.properties
 .idea/
 *.iml
 .vscode/
+
+# Host app binaries (repo convention: see app/binaries/.gitignore)
+*.apkm
+*.apks
