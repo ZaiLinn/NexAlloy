@@ -1,0 +1,58 @@
+package app.morphe.patches.music.misc.gms
+
+import app.morphe.patches.music.misc.extension.sharedExtensionPatch
+import app.morphe.patches.music.misc.fileprovider.fileProviderPatch
+import app.morphe.patches.music.misc.gms.Constants.MORPHE_MUSIC_PACKAGE_NAME
+import app.morphe.patches.music.misc.gms.Constants.MUSIC_PACKAGE_NAME
+import app.morphe.patches.music.misc.gms.Constants.MUSIC_PACKAGE_SIGNATURE
+import app.morphe.patches.music.misc.playservice.is_9_45_or_greater
+import app.morphe.patches.music.misc.playservice.versionCheckPatch
+import app.morphe.patches.music.misc.settings.PreferenceScreen
+import app.morphe.patches.music.misc.settings.settingsPatch
+import app.morphe.patches.music.misc.spoof.spoofVideoStreamsPatch
+import app.morphe.patches.music.shared.Constants.COMPATIBILITY_YOUTUBE_MUSIC
+import app.morphe.patches.music.shared.MusicActivityOnCreateFingerprint
+import app.morphe.patches.shared.PrimeMethodFingerprint
+import app.morphe.patches.shared.misc.gms.gmsCoreSupportPatch
+
+val gmsCoreSupportPatch = gmsCoreSupportPatch(
+    fromPackageName = MUSIC_PACKAGE_NAME,
+    toPackageNameDefault = MORPHE_MUSIC_PACKAGE_NAME,
+    spoofedPackageSignature = MUSIC_PACKAGE_SIGNATURE,
+    primeMethodFingerprint = PrimeMethodFingerprint,
+    mainActivityOnCreateFingerprint = MusicActivityOnCreateFingerprint,
+    extensionPatch = sharedExtensionPatch,
+    gmsCoreSupportResourcePatchFactory = ::gmsCoreSupportResourcePatch,
+    useLegacyGnpFingerprint = { !is_9_45_or_greater },
+    executeBlock = {
+        allowCastingToAudioOnlyDevices()
+        hidePlayServicesCastRoutes()
+        sendQueueMovesToReceiver()
+        skipQueueRestorationWhileCasting()
+        searchDeviceFilesWithMediaProvider()
+    },
+) {
+    dependsOn(
+        spoofVideoStreamsPatch,
+        versionCheckPatch,
+    )
+
+    compatibleWith(COMPATIBILITY_YOUTUBE_MUSIC)
+}
+
+private fun gmsCoreSupportResourcePatch() =
+    app.morphe.patches.shared.misc.gms.gmsCoreSupportResourcePatch(
+        fromPackageName = MUSIC_PACKAGE_NAME,
+        toPackageNameDefault = MORPHE_MUSIC_PACKAGE_NAME,
+        spoofedPackageSignature = MUSIC_PACKAGE_SIGNATURE,
+        screen = PreferenceScreen.MISC,
+        block = {
+            dependsOn(
+                settingsPatch,
+                fileProviderPatch(
+                    MUSIC_PACKAGE_NAME,
+                    MORPHE_MUSIC_PACKAGE_NAME
+                )
+            )
+        }
+    )

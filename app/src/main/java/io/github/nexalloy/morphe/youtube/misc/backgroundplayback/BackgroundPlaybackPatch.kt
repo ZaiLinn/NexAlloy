@@ -1,0 +1,147 @@
+package io.github.nexalloy.morphe.youtube.misc.backgroundplayback
+
+import app.morphe.extension.youtube.patches.BackgroundPlaybackPatch
+import de.robv.android.xposed.XC_MethodReplacement.returnConstant
+import io.github.nexalloy.atLast
+import io.github.nexalloy.morphe.shared.misc.debugging.experimentalBooleanFeatureFlagFingerprint
+import io.github.nexalloy.morphe.shared.misc.debugging.experimentalIndexedBooleanFeatureFlagFingerprint
+import io.github.nexalloy.morphe.shared.misc.settings.preference.ListPreference
+import io.github.nexalloy.morphe.shared.misc.settings.preference.SwitchPreference
+import io.github.nexalloy.morphe.youtube.insertLiteralOverride
+import io.github.nexalloy.morphe.youtube.misc.playercontrols.disableNewPlayerControlsFeatureFlag
+import io.github.nexalloy.morphe.youtube.misc.playservice.VersionCheck
+import io.github.nexalloy.morphe.youtube.misc.playservice.is_20_29_or_greater
+import io.github.nexalloy.morphe.youtube.misc.playservice.is_20_49_or_greater
+import io.github.nexalloy.morphe.youtube.misc.playservice.is_20_51_or_greater
+import io.github.nexalloy.morphe.youtube.misc.playservice.is_21_15_or_greater
+import io.github.nexalloy.morphe.youtube.misc.playservice.is_21_21_or_greater
+import io.github.nexalloy.morphe.youtube.misc.playservice.is_21_23_or_greater
+import io.github.nexalloy.morphe.youtube.misc.playservice.is_21_36_or_greater
+import io.github.nexalloy.morphe.youtube.misc.playservice.is_21_42_or_greater
+import io.github.nexalloy.morphe.youtube.misc.playservice.is_21_46_or_greater
+import io.github.nexalloy.morphe.youtube.misc.settings.PreferenceScreen
+import io.github.nexalloy.morphe.youtube.video.information.onCreateHook
+import io.github.nexalloy.hookMethod
+import io.github.nexalloy.patch
+
+val BackgroundPlayback = patch(
+    name = "Remove background playback restrictions",
+    description = "Removes restrictions on background playback, including playing kids videos in the background.",
+) {
+
+    dependsOn(VersionCheck)
+
+    PreferenceScreen.SHORTS.addPreferences(
+        SwitchPreference("morphe_shorts_disable_background_playback")
+    )
+
+    PreferenceScreen.MISC.addPreferences(
+        SwitchPreference("morphe_remove_background_playback_restrictions"),
+        ListPreference("morphe_auto_pause_on_screen_lock")
+    )
+
+    onCreateHook(BackgroundPlaybackPatch::initialize)
+
+    BackgroundPlaybackManagerFingerprint.hookMethod {
+        after {
+            it.result = BackgroundPlaybackPatch.isBackgroundPlaybackAllowed(it.result as Boolean)
+        }
+    }
+
+    ::backgroundPlaybackManagerShortsFingerprint.dexMethodList.forEach {
+        it.hookMethod {
+            after {
+                it.result =
+                    BackgroundPlaybackPatch.isBackgroundShortsPlaybackAllowed(it.result as Boolean)
+            }
+        }
+    }
+
+    // Enable background playback option in YouTube settings
+    val backgroundPlaybackAllowedMatch = if (is_21_23_or_greater)
+        ::backgroundPlaybackSettingsSubFingerprint
+    else
+        ::backgroundPlaybackSettingsLegacySubFingerprint
+    backgroundPlaybackAllowedMatch.hookMethod {
+        before { if (BackgroundPlaybackPatch.isPatchEnabled()) it.result = true }
+    }
+
+    // Prevents playback from resuming if it was interrupted from the notification
+    // and the app was subsequently brought to the foreground.
+    if (is_21_15_or_greater) {
+        val allowed = BackgroundPlaybackSettingFingerprint.method
+        ::backgroundPlaybackSettingConstructor.hookMethod {
+            after {
+                val setting = it.thisObject
+                BackgroundPlaybackPatch.setBackgroundPlaybackSetting { allowed.invoke(setting) as Boolean }
+            }
+        }
+        val accessors = mutableListOf(::experimentalBooleanFeatureFlagFingerprint.method)
+        if (is_21_42_or_greater) accessors += ::experimentalIndexedBooleanFeatureFlagFingerprint.method
+        // Flag accessors are hot during feed layout. Share one scope across the playback
+        // methods so unrelated flag reads don't traverse a callback for every caller.
+        val backgroundPlaybackDepth = ThreadLocal<Int>()
+        ::playingWhenBackgroundedMethods.dexMethodList.forEach { method ->
+            method.hookMethod {
+                before {
+                    backgroundPlaybackDepth.set((backgroundPlaybackDepth.get() ?: 0) + 1)
+                }
+                after {
+                    val depth = backgroundPlaybackDepth.get() ?: return@after
+                    if (depth == 1) backgroundPlaybackDepth.remove()
+                    else backgroundPlaybackDepth.set(depth - 1)
+                }
+            }
+        }
+        accessors.forEach { accessor ->
+            accessor.hookMethod {
+                after {
+                    if (!it.hasThrowable() && it.args.atLast(2) == 45770945L &&
+                        backgroundPlaybackDepth.get() != null
+                    ) {
+                        it.result = BackgroundPlaybackPatch.isAutomaticForegroundPlaybackAllowed(it.result as Boolean)
+                    }
+                }
+            }
+        }
+    }
+
+    // Prevents playback from pausing when the overlay video settings is invoked.
+    if (is_20_49_or_greater) {
+        insertLiteralOverride(45741823L, BackgroundPlaybackPatch::isAutomaticPlaybackPauseInFlyout)
+    }
+
+    // Force allowing background play for Shorts.
+    insertLiteralOverride(45415425L, BackgroundPlaybackPatch::enableFeatureFlag)
+
+    // Force allowing background play for videos labeled for kids.
+    (if (is_21_46_or_greater)
+        KidsBackgroundPlaybackPolicyControllerFingerprint else KidsBackgroundPlaybackPolicyControllerLegacyFingerprint).hookMethod {
+        before { if (BackgroundPlaybackPatch.isPatchEnabled()) it.result = null }
+    }
+    if (is_20_51_or_greater) {
+        val artwork = ::mediaSessionArtworkStateMethod.method
+
+        artwork.hookMethod {
+            after { if (it.result == 0) it.result = 0x100 }
+        }
+    }
+
+    // Fix PiP buttons not working after locking/unlocking device screen.
+    if (!is_21_21_or_greater) {
+        insertLiteralOverride(45638483L, BackgroundPlaybackPatch::disableFeatureFlag)
+    }
+
+    if (is_20_29_or_greater && !is_21_36_or_greater) {
+        // Client flag that interferes with background playback of some video types.
+        // Exact purpose is not clear and it's used in ~ 100 locations.
+        // Flag cannot be forced off with 21.36+ or the player seekbar is missing.
+        //
+        // Edit: This override may not be needed and only 45752335L override might be needed.
+        insertLiteralOverride(45698813L, BackgroundPlaybackPatch::disableFeatureFlag)
+    }
+
+    // If NewPlayerTypeEnumFeatureFlagFingerprint is overridden then must also
+    // force off new player control flags otherwise player has no buttons visible.
+    disableNewPlayerControlsFeatureFlag()
+}

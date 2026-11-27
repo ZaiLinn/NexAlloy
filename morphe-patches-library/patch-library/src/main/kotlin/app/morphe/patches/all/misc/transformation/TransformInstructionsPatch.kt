@@ -1,0 +1,57 @@
+package app.morphe.patches.all.misc.transformation
+
+import app.morphe.patcher.patch.classDefForEach
+import app.morphe.patcher.patch.mutableClassDefBy
+import app.morphe.patcher.patch.patch
+import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
+import app.morphe.util.findMutableMethodOf
+import com.android.tools.smali.dexlib2.iface.ClassDef
+import com.android.tools.smali.dexlib2.iface.Method
+import com.android.tools.smali.dexlib2.iface.instruction.Instruction
+
+@Deprecated(
+    "This class may be deleted in the future. Instead use Fingerprint.matchAll() " +
+            "or classDefForEach {} with findInstructionIndicesReversedOrThrow()"
+)
+fun <T> transformInstructionsPatch(
+    filterMap: (ClassDef, Method, Instruction, Int) -> T?,
+    transform: (MutableMethod, T) -> Unit,
+) = patch(
+    default = false
+) {
+    // Returns the patch indices as a Sequence, which will execute lazily.
+    fun findPatchIndices(classDef: ClassDef, method: Method): Sequence<T>? =
+        method.implementation?.instructions?.asSequence()?.withIndex()?.mapNotNull { (index, instruction) ->
+        filterMap(classDef, method, instruction, index)
+    }
+
+    execute {
+        // Find all methods to patch
+        buildMap {
+            classDefForEach { classDef ->
+                val methods = buildList {
+                    classDef.methods.forEach { method ->
+                        // Since the Sequence executes lazily,
+                        // using any() results in only calling
+                        // filterMap until the first index has been found.
+                        if (findPatchIndices(classDef, method)?.any() == true) add(method)
+                    }
+                }
+
+                if (methods.isNotEmpty()) {
+                    put(classDef, methods)
+                }
+            }
+        }.forEach { (classDef, methods) ->
+            // And finally transform the methods...
+            val mutableClass = mutableClassDefBy(classDef)
+
+            methods.map(mutableClass::findMutableMethodOf).forEach methods@{ mutableMethod ->
+                val patchIndices = findPatchIndices(mutableClass, mutableMethod)?.toCollection(ArrayDeque())
+                    ?: return@methods
+
+                while (!patchIndices.isEmpty()) transform(mutableMethod, patchIndices.removeLast())
+            }
+        }
+    }
+}

@@ -1,0 +1,20 @@
+# Build outputs
+build/
+app/build/
+*/build/
+morphe-patches/*/build/
+morphe-patches/.gradle/
+morphe-patches-library/*/build/
+
+# Gradle / Kotlin caches
+.gradle/
+.kotlin/
+local.properties
+
+# OS
+.DS_Store
+
+# IDE
+.idea/
+*.iml
+.vscode/
