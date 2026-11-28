@@ -23,6 +23,9 @@
 | YouTube | `com.google.android.youtube` |
 | YouTube Music | `com.google.android.apps.youtube.music` |
 | Reddit | `com.reddit.frontpage` |
+| Google Photos | `com.google.android.apps.photos` |
+| Instagram | `com.instagram.android` |
+| Threads | `com.instagram.barcelona` |
 
 ## Patches
 
@@ -85,6 +88,17 @@
 - Hide ads
 - Sanitize sharing links
 - Start as guest
+
+### Google Photos
+- Spoof Pixel XL (unlock device-specific features)
+- Enable DCIM folders backup control
+
+### Instagram
+- Hide ads
+
+### Threads
+- Hide ads
+- Simplified Chinese content filter
 
 ## Building
 
