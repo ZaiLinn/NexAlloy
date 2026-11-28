@@ -18,14 +18,17 @@
 
 ## Supported apps
 
-| App | Package |
-| --- | --- |
-| YouTube | `com.google.android.youtube` |
-| YouTube Music | `com.google.android.apps.youtube.music` |
-| Reddit | `com.reddit.frontpage` |
-| Google Photos | `com.google.android.apps.photos` |
-| Instagram | `com.instagram.android` |
-| Threads | `com.instagram.barcelona` |
+| App | Package | Tested version |
+| --- | --- | --- |
+| YouTube | `com.google.android.youtube` | 21.45.82 |
+| YouTube Music | `com.google.android.apps.youtube.music` | 9.46.51 |
+| Reddit | `com.reddit.frontpage` | 2026.39.1 |
+| Google Photos | `com.google.android.apps.photos` | — |
+| Instagram | `com.instagram.android` | — |
+| Threads | `com.instagram.barcelona` | — |
+
+> [!TIP]
+> Patches and fingerprint tests are verified against the versions above. Other versions generally work, but Reddit's full feature set is only enabled on `2026.39.1` (older/newer Reddit versions fall back to core patches).
 
 ## Patches
 
