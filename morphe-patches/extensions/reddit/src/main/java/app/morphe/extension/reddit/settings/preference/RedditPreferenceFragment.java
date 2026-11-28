@@ -192,62 +192,53 @@ public class RedditPreferenceFragment extends AbstractPreferenceFragment {
         fragmentManager.executePendingTransactions();
     }
 
-    /** One visible preference and the category/position needed to navigate to it. */
-    public static final class SearchEntry {
-        public final String categoryKey;
-        public final CharSequence categoryTitle;
-        @Nullable public final String preferenceKey;
-        public final CharSequence title;
-        public final CharSequence summary;
-        public final int position;
+    private PreferenceScreen searchScreen;
 
-        SearchEntry(String categoryKey, CharSequence categoryTitle, Preference preference, int position) {
-            this.categoryKey = categoryKey;
-            this.categoryTitle = categoryTitle;
-            this.preferenceKey = preference.getKey();
-            this.title = preference.getTitle() != null ? preference.getTitle() : "";
-            this.summary = preference.getSummary() != null ? preference.getSummary() : "";
-            this.position = position;
-        }
-    }
-
-    /** Uses the same probe screens as the first-level rows, including patch availability. */
-    public List<SearchEntry> buildSearchIndex() {
-        List<SearchEntry> entries = new ArrayList<>();
+    /** A complete, patch-filtered tree for the shared settings search controller. */
+    public PreferenceScreen getPreferenceScreenForSearch() {
+        if (searchScreen != null) return searchScreen;
         Context context = getContext();
-        if (context == null || !isAdded()) return entries;
+        if (context == null || !isAdded()) return null;
+        searchScreen = getPreferenceManager().createPreferenceScreen(context);
         for (String[] screen : SCREENS) {
-            PreferenceScreen probe = getPreferenceManager().createPreferenceScreen(context);
-            ConditionalPreferenceCategory category = newCategory(context, probe, screen[0]);
-            if (category != null && probe.getPreferenceCount() > 0) {
-                collectSearchEntries(probe, screen[0], str(screen[1]), new int[]{0}, entries);
+            PreferenceScreen categoryScreen = getPreferenceManager().createPreferenceScreen(context);
+            categoryScreen.setKey(screen[0]);
+            categoryScreen.setTitle(str(screen[1]));
+            ConditionalPreferenceCategory category = newCategory(context, categoryScreen, screen[0]);
+            if (category != null && categoryScreen.getPreferenceCount() > 0) {
+                // The category screen supplies the path; avoid repeating its title underneath.
+                category.setTitle(null);
+                searchScreen.addPreference(categoryScreen);
             }
         }
-        return entries;
+        return searchScreen;
     }
 
-    private static void collectSearchEntries(PreferenceGroup group, String categoryKey,
-                                              CharSequence categoryTitle, int[] position,
-                                              List<SearchEntry> entries) {
+    /** Shared search navigates through this host's fragment-based category screens. */
+    public void openSearchResult(String categoryKey, @Nullable Preference preference) {
+        FragmentManager manager = getFragmentManager();
+        if (!isAdded() || manager == null || manager.isStateSaved()) return;
+        for (String[] screen : SCREENS) {
+            if (!screen[0].equals(categoryKey)) continue;
+            PreferenceGroup category = (PreferenceGroup) getPreferenceScreenForSearch().findPreference(categoryKey);
+            int position = preference == null ? -1 : findIdentityPosition(category, preference, new int[]{0});
+            manager.popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+            openCategory(categoryKey, str(screen[1]), preference != null ? preference.getKey() : null, position);
+            return;
+        }
+    }
+
+    private static int findIdentityPosition(PreferenceGroup group, Preference target, int[] position) {
         for (int i = 0; i < group.getPreferenceCount(); i++) {
             Preference preference = group.getPreference(i);
-            int currentPosition = position[0]++;
-            if (!(preference instanceof PreferenceCategory)
-                    && preference.getTitle() != null && preference.getTitle().length() > 0) {
-                entries.add(new SearchEntry(categoryKey, categoryTitle, preference, currentPosition));
-            }
+            int current = position[0]++;
+            if (preference == target) return current;
             if (preference instanceof PreferenceGroup children) {
-                collectSearchEntries(children, categoryKey, categoryTitle, position, entries);
+                int found = findIdentityPosition(children, target, position);
+                if (found >= 0) return found;
             }
         }
-    }
-
-    /** Called by the search dialog after dismissing it. */
-    public void openSearchResult(SearchEntry entry) {
-        FragmentManager manager = getFragmentManager();
-        if (entry == null || !isAdded() || manager == null || manager.isStateSaved()) return;
-        manager.popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
-        openCategory(entry.categoryKey, entry.categoryTitle, entry.preferenceKey, entry.position);
+        return -1;
     }
 
     private static int findPosition(PreferenceGroup group, String key, int[] position) {
@@ -294,6 +285,8 @@ public class RedditPreferenceFragment extends AbstractPreferenceFragment {
                 ? RedditSettingsStyle.getBackgroundColor()
                 : ThemeUtils.getAppBackgroundColor());
 
+        if (getCategoryKey() == null) RedditActivityHook.initializeSearch(this);
+
         ListView listView = view.findViewById(android.R.id.list);
         if (listView != null) {
             if (RedditSettingsStyle.isModernStyle()) {
@@ -312,7 +305,15 @@ public class RedditPreferenceFragment extends AbstractPreferenceFragment {
                     listView.post(() -> listView.post(() -> {
                         if (isAdded() && getView() == view && listView.getAdapter() != null) {
                             int count = listView.getAdapter().getCount();
-                            if (count > 0) listView.setSelection(Math.min(targetPosition, count - 1));
+                            if (count > 0) {
+                                int selected = Math.min(targetPosition, count - 1);
+                                listView.setSelection(selected);
+                                listView.postDelayed(() -> {
+                                    if (isAdded() && getView() == view) {
+                                        RedditActivityHook.highlightSearchResult(listView, selected);
+                                    }
+                                }, 150);
+                            }
                         }
                     }));
                 }
@@ -351,6 +352,8 @@ public class RedditPreferenceFragment extends AbstractPreferenceFragment {
             rootView.getViewTreeObserver().removeOnPreDrawListener(styleListener);
         }
         styleListener = null;
+        if (getCategoryKey() == null) RedditActivityHook.destroySearch(this);
+        searchScreen = null;
         super.onDestroyView();
     }
 }

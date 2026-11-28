@@ -347,6 +347,7 @@ public class SearchResultsAdapter extends ArrayAdapter<BaseSearchResultItem> {
     protected void navigateAndScrollToPreference(BaseSearchResultItem item) {
         // No navigation for URL_LINK items.
         if (item.preferenceType == BaseSearchResultItem.ViewType.URL_LINK) return;
+        if (navigateUsingFragment(item, true)) return;
 
         PreferenceScreen targetScreen = navigateToTargetScreen(item);
         if (targetScreen == null) return;
@@ -423,6 +424,7 @@ public class SearchResultsAdapter extends ArrayAdapter<BaseSearchResultItem> {
      * Navigates to the final PreferenceScreen using preference keys or titles as fallback.
      */
     protected PreferenceScreen navigateToTargetScreen(BaseSearchResultItem item) {
+        if (navigateUsingFragment(item, false)) return null;
         PreferenceScreen currentScreen = fragment.getPreferenceScreenForSearch();
         Preference targetPref = null;
 
@@ -447,6 +449,16 @@ public class SearchResultsAdapter extends ArrayAdapter<BaseSearchResultItem> {
         }
 
         return currentScreen;
+    }
+
+    private boolean navigateUsingFragment(BaseSearchResultItem item, boolean scroll) {
+        Preference preference = scroll && item instanceof BaseSearchResultItem.PreferenceSearchItem result
+                ? result.preference : null;
+        Runnable navigation = fragment.getSearchResultNavigation(preference, item.navigationKeys);
+        if (navigation == null) return false;
+        searchViewController.closeSearch();
+        navigation.run();
+        return true;
     }
 
     /**
@@ -536,7 +548,7 @@ public class SearchResultsAdapter extends ArrayAdapter<BaseSearchResultItem> {
     /**
      * Highlights a preference at the specified position with a blink effect.
      */
-    protected void highlightPreferenceAtPosition(ListView listView, int position) {
+    public void highlightPreferenceAtPosition(ListView listView, int position) {
         int firstVisible = listView.getFirstVisiblePosition();
         if (position < firstVisible || position > listView.getLastVisiblePosition()) {
             return;

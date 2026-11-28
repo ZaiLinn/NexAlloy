@@ -36,6 +36,8 @@ import io.github.nexalloy.morphe.youtube.layout.hide.shorts.ShortsBottomBarConta
 import io.github.nexalloy.morphe.youtube.misc.contexthook.Endpoint
 import io.github.nexalloy.morphe.youtube.misc.contexthook.addOSNameHook
 import io.github.nexalloy.morphe.youtube.misc.contexthook.clientContextHookPatch
+import io.github.nexalloy.morphe.youtube.misc.toolbar.hookToolBar
+import io.github.nexalloy.morphe.youtube.misc.toolbar.toolBarHookPatch
 import io.github.nexalloy.morphe.youtube.misc.fix.padding.BrowseListBottomPaddingFingerprint
 import io.github.nexalloy.morphe.youtube.misc.fix.padding.browseListSetPaddingMethod
 import io.github.nexalloy.morphe.youtube.misc.fix.padding.fixPagePaddingPatch
@@ -94,6 +96,7 @@ val NavigationBar = patch(
         NavigationBarHook,
         VersionCheck,
         clientContextHookPatch,
+        toolBarHookPatch,
     )
 
     val navPreferences = mutableSetOf(
@@ -440,4 +443,12 @@ val NavigationBar = patch(
 //        )
 //    )
     // TODO upper navigation toolbar
+
+    // Notifications bell of the top bar: the button itself and its new-content dot.
+    navPreferences += setOf(
+        SwitchPreference("morphe_hide_toolbar_notification_button"),
+        SwitchPreference("morphe_hide_toolbar_notification_button_dot", summary = true),
+    )
+    hookToolBar(NavigationBarPatch::hideNotificationButton)
+    hookToolBar(NavigationBarPatch::hideNotificationButtonDot)
 }

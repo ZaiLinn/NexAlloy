@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Runtime port of "Miniplayer previous and next buttons"
+  (morphe-patches/patches/src/main/kotlin/app/morphe/patches/music/layout/miniplayer/MiniplayerNextPreviousButtonsPatch.kt).
+
+  The upstream resource patch adds these ids to the host APK when it injects the buttons into
+  the miniplayer layout. At runtime the module defines them instead: the extension resolves
+  them with ResourceUtils, which searches the module package first, and the injected button
+  views carry them. The 0x4b resource package id of the module keeps them clear of the host ids.
+-->
+<resources>
+    <item type="id" name="mini_player_previous_button" />
+    <item type="id" name="mini_player_next_button" />
+</resources>

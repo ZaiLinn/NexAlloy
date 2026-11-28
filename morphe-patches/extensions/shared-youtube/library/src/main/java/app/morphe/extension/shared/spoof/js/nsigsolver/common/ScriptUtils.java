@@ -28,6 +28,10 @@ public class ScriptUtils {
                 .replace("nsigsolver/", "")
                 .replace(".js", "");
 
+        // The runtime module builds its resources with aapt2, which allows only [a-z0-9_]
+        // in resource names, so the scripts are stored with sanitized names.
+        fixedFilename = fixedFilename.replaceAll("[^a-zA-Z0-9_]", "_");
+
         return ResourceUtils.getRawResource(fixedFilename);
     }
 

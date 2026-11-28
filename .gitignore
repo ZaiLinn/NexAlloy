@@ -22,3 +22,8 @@ local.properties
 # Host app binaries (repo convention: see app/binaries/.gitignore)
 *.apkm
 *.apks
+signing.properties
+
+# Local scratch
+.vibe-debug/
+.wip/

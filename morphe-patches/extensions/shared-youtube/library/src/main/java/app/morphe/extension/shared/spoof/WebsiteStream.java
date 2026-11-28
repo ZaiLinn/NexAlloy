@@ -50,6 +50,14 @@ import app.morphe.extension.shared.spoof.requests.StreamingDataRequest;
  * from the position it asked for. Seeks of other sources are kept.
  */
 public final class WebsiteStream {
+    // Runtime ports cannot add MediaHttpHeader to the host's already loaded class.
+    private static java.util.function.Function<HttpHeader, String> headerNameResolver =
+            header -> ((MediaHttpHeader) header).patch_getName();
+
+    public static void setHeaderNameResolver(java.util.function.Function<HttpHeader, String> resolver) {
+        headerNameResolver = java.util.Objects.requireNonNull(resolver);
+    }
+
     // UMP parts of media responses.
     private static final int PART_MEDIA_HEADER = 20;
     private static final int PART_SABR_ERROR = 44;
@@ -223,7 +231,7 @@ public final class WebsiteStream {
         ArrayList<HttpHeader> appHeaders = request.patch_getHeaders();
         if (appHeaders != null) {
             for (HttpHeader header : appHeaders) {
-                if (!isReplacedHeader(((MediaHttpHeader) header).patch_getName())) {
+                if (!isReplacedHeader(headerNameResolver.apply(header))) {
                     headers.add(header);
                 }
             }

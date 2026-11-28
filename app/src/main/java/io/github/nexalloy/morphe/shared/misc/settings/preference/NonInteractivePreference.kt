@@ -32,10 +32,19 @@ class NonInteractivePreference(
     val dependency: String? = null,
 ) : BasePreference(key, titleKey, summaryKey, icon, iconBold, layout, tag) {
 
+    // The built preference is held to set the dependency at attach time, like the
+    // android:dependency XML attribute of the patcher does. Setting it during build
+    // throws, because the dependency is not in the hierarchy yet.
+    private var built: Preference? = null
+
     override fun build(ctx: Context, prefMgr: PreferenceManager): Preference {
         return super.build(ctx, prefMgr).apply {
             isSelectable = selectable
-            this@NonInteractivePreference.dependency?.let { dependency = it }
+            built = this
         }
+    }
+
+    override fun onAttachedToHierarchy() {
+        dependency?.let { key -> built?.dependency = key }
     }
 }

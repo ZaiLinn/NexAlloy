@@ -543,6 +543,9 @@ Pausing crossfade to watch a music video can leave some videos black. Pausing cr
 
     <!-- 'Activity' should be translated using the same localized wording YouTube Music displays for the tab. -->
     <string name="morphe_music_hide_activity_button_title">Hide Activity button</string>
+    <string name="morphe_music_hide_activity_button_summary">Hides the notifications bell in the top right of the top bar.</string>
+    <string name="morphe_music_hide_notification_dot_title">Hide Activity button dot</string>
+    <string name="morphe_music_hide_notification_dot_summary">Hides the unread badge and dot of the notifications bell in the top bar.</string>
     <!-- 'Ask Music' should be translated using the same localized wording YouTube Music displays for the tab. -->
     <string name="morphe_music_hide_ask_music_button_title">Hide \'Ask Music\' button</string>
     <string name="morphe_music_hide_cast_button_title">Hide Cast button</string>
@@ -1070,4 +1073,8 @@ Lyrics come from third-party services that are not affiliated with, sponsored, o
     <string name="morphe_music_spoof_app_version_target_entry_8_23_51">8.23.51 - Disable bold icons</string>
     <string name="morphe_music_spoof_app_version_target_entry_9_13_51">9.13.51 - Restore Player Up next, Lyrics, and Related tabs</string>
 
+    <string name="morphe_music_lyrics_track_offset_title">Lyrics timing</string>
+    <string name="morphe_music_lyrics_track_offset_earlier">Earlier · 100 ms</string>
+    <string name="morphe_music_lyrics_track_offset_later">Later · 100 ms</string>
+    <string name="morphe_music_lyrics_track_offset_reset">Reset this song</string>
 </resources>

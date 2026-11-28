@@ -496,6 +496,9 @@ Second \"item\" text"</string>
   <string name="morphe_music_navigation_bar_glass_preview_library">媒体库</string>
   <!-- 'Activity' should be translated using the same localized wording YouTube Music displays for the tab. -->
   <string name="morphe_music_hide_activity_button_title">隐藏“活动”按钮</string>
+  <string name="morphe_music_hide_activity_button_summary">隐藏顶栏右上角的通知铃铛。</string>
+  <string name="morphe_music_hide_notification_dot_title">隐藏“活动”按钮红点</string>
+  <string name="morphe_music_hide_notification_dot_summary">隐藏顶栏通知铃铛上的未读红点和数字角标。</string>
   <!-- 'Ask Music' should be translated using the same localized wording YouTube Music displays for the tab. -->
   <string name="morphe_music_hide_ask_music_button_title">隐藏“询问音乐”按钮</string>
   <string name="morphe_music_hide_cast_button_title">隐藏投屏按钮</string>
@@ -1003,4 +1006,8 @@ Second \"item\" text"</string>
   <!-- misc.spoof.appversion.spoofAppVersionPatch -->
   <string name="morphe_music_spoof_app_version_target_entry_8_23_51">8.23.51 - 禁用粗体图标</string>
   <string name="morphe_music_spoof_app_version_target_entry_9_13_51">9.13.51 - 恢复播放器的「接下来播放」「歌词」和「相关」标签页</string>
+    <string name="morphe_music_lyrics_track_offset_title">歌词偏移</string>
+    <string name="morphe_music_lyrics_track_offset_earlier">提前 · 100 毫秒</string>
+    <string name="morphe_music_lyrics_track_offset_later">延后 · 100 毫秒</string>
+    <string name="morphe_music_lyrics_track_offset_reset">重置当前歌曲</string>
 </resources>

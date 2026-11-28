@@ -47,6 +47,7 @@ val HideAds = patch(
 //        SwitchPreference("morphe_hide_end_screen_store_banner"),
         SwitchPreference("morphe_hide_general_ads"),
         SwitchPreference("morphe_hide_merchandise_banners"),
+        SwitchPreference("morphe_hide_movies_section"),
         SwitchPreference("morphe_hide_paid_promotion_labels"),
         SwitchPreference("morphe_hide_player_popup_ads"),
         SwitchPreference("morphe_hide_self_sponsor_ads"),

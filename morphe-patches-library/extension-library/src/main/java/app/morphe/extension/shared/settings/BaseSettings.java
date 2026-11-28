@@ -15,6 +15,9 @@ import io.github.nexalloy.BuildConfig;
  * or reference this class.
  */
 public class BaseSettings {
+    public static final BooleanSetting SETTINGS_SEARCH_HISTORY = new BooleanSetting("morphe_settings_search_history", TRUE, true);
+    public static final StringSetting SETTINGS_SEARCH_ENTRIES = new StringSetting("morphe_settings_search_entries", "");
+
     /**
      * Use {@link Logger#isDebugEnabled()} or {@link Logger#isVerboseEnabled()} to check if logging is enabled.
      */

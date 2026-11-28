@@ -68,6 +68,8 @@ public final class AdsFilter extends Filter {
 
     private final StringFilterGroup buyMovieAd;
     private final ByteArrayFilterGroup buyMovieAdBuffer;
+    private final StringFilterGroup emlMovieShelf;
+    private final ByteArrayFilterGroup emlMovieShelfBuffer;
     private final StringFilterGroup premiumVideo;
     private final StringFilterGroup productCard;
     private final ByteArrayFilterGroup productCardBuffer;
@@ -101,6 +103,19 @@ public final class AdsFilter extends Filter {
         buyMovieAdBuffer = new ByteArrayFilterGroup(
                 null,
                 "FEstorefront"
+        );
+
+        // The EML shelf of the movies storefront ("Primetime movies"). Every horizontal
+        // EML shelf shares the same component type, so the shelf is anchored by its path
+        // and identified by the storefront link in its buffer.
+        emlMovieShelf = new StringFilterGroup(
+                null,
+                "horizontal_shelf.eml-fe"
+        );
+
+        emlMovieShelfBuffer = new ByteArrayFilterGroup(
+                Settings.HIDE_MOVIES_SECTION,
+                "feed/storefront"
         );
 
         final var generalAds = new StringFilterGroup(
@@ -215,6 +230,7 @@ public final class AdsFilter extends Filter {
 
         addPathCallbacks(
                 buyMovieAd,
+                emlMovieShelf,
                 generalAds,
                 merchandise,
                 movieAds,
@@ -245,6 +261,10 @@ public final class AdsFilter extends Filter {
 
         if (matchedGroup == buyMovieAd) {
             return contentIndex == 0 && buyMovieAdBuffer.check(buffer).isFiltered();
+        }
+
+        if (matchedGroup == emlMovieShelf) {
+            return contentIndex == 0 && emlMovieShelfBuffer.check(buffer).isFiltered();
         }
 
         if (matchedGroup == premiumVideo) {

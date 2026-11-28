@@ -73,6 +73,7 @@ public class MiscellaneousPreferenceCategory extends ConditionalPreferenceCatego
         importPref.setTitle(str("morphe_pref_import_export_title"));
         importPref.setSummary(str("morphe_pref_import_export_summary"));
         addPreference(importPref);
+        addPreference(new BooleanSettingPreference(context, BaseSettings.SETTINGS_SEARCH_HISTORY));
 
         addPreference(new CustomDialogListPreference(context, SharedSettings.PATCHES_UPDATE_NOTICE));
 

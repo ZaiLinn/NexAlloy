@@ -1839,7 +1839,9 @@ public final class NavigationBarPatch {
 
     private static final String[] NOTIFICATION_BUTTON_ENUMS = {
             "TAB_ACTIVITY_CAIRO", // New layout.
-            "TAB_ACTIVITY" // Old layout.
+            "TAB_ACTIVITY", // Old layout.
+            // The toolbar bell of newer layouts, titled 'Messages'.
+            "MESSAGE_BUBBLE_OVERLAP"
     };
 
     /**
@@ -1869,6 +1871,16 @@ public final class NavigationBarPatch {
     private static final boolean HIDE_TOOLBAR_CREATE_BUTTON = Settings.HIDE_TOOLBAR_CREATE_BUTTON.get();
 
     private static final boolean HIDE_TOOLBAR_NOTIFICATION_BUTTON = Settings.HIDE_TOOLBAR_NOTIFICATION_BUTTON.get();
+
+    private static final boolean HIDE_TOOLBAR_NOTIFICATION_BUTTON_DOT = Settings.HIDE_TOOLBAR_NOTIFICATION_BUTTON_DOT.get();
+
+    /**
+     * The new-content dot view id of a top bar button item.
+     * The dot of the notifications bell is inflated from this stub.
+     */
+    private static final int toolbarNewContentDotId = HIDE_TOOLBAR_NOTIFICATION_BUTTON_DOT
+            ? ResourceUtils.getIdentifier(ResourceType.ID, "new_content_dot")
+            : 0;
 
     private static final boolean HIDE_TOOLBAR_SEARCH_BUTTON = Settings.HIDE_TOOLBAR_SEARCH_BUTTON.get();
 
@@ -2097,6 +2109,28 @@ public final class NavigationBarPatch {
     public static void hideNotificationButton(String enumName, View parentView, ImageView imageView) {
         boolean shouldHide = HIDE_TOOLBAR_NOTIFICATION_BUTTON && Utils.equalsAny(enumName, NOTIFICATION_BUTTON_ENUMS);
         Utils.hideViewUnderCondition(shouldHide, parentView);
+    }
+
+    /**
+     * Injection point. Keeps the new-content dot of the notifications toolbar button invisible.
+     * The dot is inflated from a stub of the button item, so it is checked on every pre-draw
+     * until it appears, mirroring how the navigation bar dot is handled.
+     */
+    public static void hideNotificationButtonDot(String enumName, View parentView, ImageView imageView) {
+        if (!HIDE_TOOLBAR_NOTIFICATION_BUTTON_DOT || !Utils.equalsAny(enumName, NOTIFICATION_BUTTON_ENUMS)) {
+            return;
+        }
+        try {
+            parentView.getViewTreeObserver().addOnPreDrawListener(() -> {
+                View dot = parentView.findViewById(toolbarNewContentDotId);
+                if (dot != null && !(dot instanceof ViewStub) && dot.getVisibility() == View.VISIBLE) {
+                    dot.setVisibility(View.INVISIBLE);
+                }
+                return true;
+            });
+        } catch (Exception ex) {
+            Logger.printException(() -> "hideNotificationButtonDot failure", ex);
+        }
     }
 
     /**

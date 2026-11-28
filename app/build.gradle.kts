@@ -29,7 +29,7 @@ android {
 
     defaultConfig {
         applicationId = "io.github.zailinn.nexalloy"
-        versionCode = 134
+        versionCode = 150
         versionName = "2.0.$versionCode"
         val patchVersion = Properties().apply {
             rootProject.file("morphe-patches/gradle.properties").inputStream().use { load(it) }
@@ -327,7 +327,16 @@ abstract class GenerateStringsTask @Inject constructor(
                 // Merge arrays.xml from all subdirectories
                 val arrayFiles = subDirs.map { File(variant, "$it/arrays.xml") }
                 if (arrayFiles.any { it.exists() }) {
-                    writeResources(readResources(arrayFiles), File(genResDir, "arrays.xml"))
+                    // YouTube and Music share these names but offer different clients.
+                    // Keep Music's choices under separate names in the combined module.
+                    val musicSpoofArrays = readResources(listOf(File(variant, "music/arrays.xml")))
+                        .filter { it.attributes()["name"] in setOf(
+                            "morphe_spoof_video_streams_client_type_entries",
+                            "morphe_spoof_video_streams_client_type_entry_values"
+                        ) }.onEach {
+                            it.attributes()["name"] = "${it.attributes()["name"]}_music"
+                        }
+                    writeResources(readResources(arrayFiles) + musicSpoofArrays, File(genResDir, "arrays.xml"))
                 }
             }
         }.onFailure {
@@ -357,11 +366,16 @@ abstract class CopyResourcesTask @Inject constructor() : DefaultTask() {
             "qualitybutton/drawable" to null,
             "settings/drawable" to null,
             "settings/menu" to null,
+            "spoof/raw" to null,
             "settings/layout" to listOf("morphe_settings_with_toolbar.xml"),
             "sponsorblock/drawable" to null,
             "sponsorblock/layout" to listOf("morphe_sb_skip_sponsor_button.xml"),
             "swipecontrols/drawable" to null,
             "copyvideolinkbutton/drawable" to null,
+            "romanisationbutton/drawable" to null,
+            "lyricscurrentbutton/drawable" to null,
+            "lyricsbrand/drawable" to null,
+            "lyricsfullscreenbutton/drawable" to null,
             "downloads/drawable" to null,
             "dearrowbutton/drawable" to null,
             "reloadbutton/drawable" to null,
@@ -376,7 +390,15 @@ abstract class CopyResourcesTask @Inject constructor() : DefaultTask() {
             val targetDir = File(outputDir, dir)
             sourceDir.listFiles()?.forEach { file ->
                 if (excludes == null || !excludes.contains(file.name)) {
-                    file.copyTo(File(targetDir, file.name), overwrite = true)
+                    // The upstream patcher writes resource names the Android build tools reject
+                    // (aapt2 allows only [a-z0-9_]). Store raw resources with sanitized names;
+                    // the extension looks them up with the same sanitization (ScriptUtils).
+                    val targetName = if (dir == "raw") {
+                        file.name.substringBeforeLast('.').replace(Regex("[^a-z0-9_]"), "_")
+                    } else {
+                        file.name
+                    }
+                    file.copyTo(File(targetDir, targetName), overwrite = true)
                 }
             }
         }

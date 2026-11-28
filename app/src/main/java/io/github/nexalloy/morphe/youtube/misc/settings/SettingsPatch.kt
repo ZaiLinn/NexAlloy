@@ -50,6 +50,24 @@ val SettingsHook = patch(
         initializationPatch()
     )
 
+    // Resolve at runtime so Cairo's injected header and row use exactly the same
+    // typography and spacing as Account and General in the installed host version.
+    val nativeGroupTitle = appContext.resources.getIdentifier("preference_group_title", "layout", appContext.packageName)
+    val nativeSettingsEntry = appContext.resources.getIdentifier("preference_with_icon", "layout", appContext.packageName)
+    android.view.LayoutInflater::class.java.getDeclaredMethod(
+        "inflate", Int::class.javaPrimitiveType, android.view.ViewGroup::class.java,
+        Boolean::class.javaPrimitiveType
+    ).hookMethod {
+        before {
+            val replacement = when (it.args[0] as Int) {
+                R.layout.morphe_yt_settings_group_title -> nativeGroupTitle
+                R.layout.morphe_yt_settings_entry -> nativeSettingsEntry
+                else -> 0
+            }
+            if (replacement != 0) it.args[0] = replacement
+        }
+    }
+
     ::PreferenceFragmentCompat_addPreferencesFromResource.hookMethod {
         val settings_fragment = ResourceUtils.getXmlIdentifier("settings_fragment")
         val settings_fragment_cairo = ResourceUtils.getXmlIdentifier("settings_fragment_cairo")

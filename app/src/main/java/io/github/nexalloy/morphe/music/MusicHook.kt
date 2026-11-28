@@ -32,6 +32,20 @@ import io.github.nexalloy.morphe.music.misc.audiovideoswitch.enableAudioVideoSwi
 import io.github.nexalloy.morphe.music.layout.returnyoutubedislike.returnYouTubeDislikePatch
 import io.github.nexalloy.morphe.music.layout.sponsorblock.musicSponsorBlockPatch
 import io.github.nexalloy.morphe.music.interaction.likefilter.queueLikeFilterPatch
+import io.github.nexalloy.morphe.music.layout.lyrics.lyricsPatch
+import io.github.nexalloy.morphe.music.layout.miniplayer.changeMiniplayerColorPatch
+import io.github.nexalloy.morphe.music.layout.miniplayer.enableForcedMiniplayerPatch
+import io.github.nexalloy.morphe.music.layout.miniplayer.enableSwipeToDismissMiniplayerPatch
+import io.github.nexalloy.morphe.music.layout.miniplayer.miniplayerPreviousNextButtonsPatch
+import io.github.nexalloy.morphe.music.layout.buttons.action.hideMusicActionButtonsPatch
+import io.github.nexalloy.morphe.music.layout.hide.flyoutmenu.hideFlyoutMenuComponentsPatch
+import io.github.nexalloy.morphe.music.layout.hide.general.hideLayoutComponentsPatch
+import io.github.nexalloy.morphe.music.layout.applemusicartwork.appleMusicArtworkPatch
+import io.github.nexalloy.morphe.music.layout.hide.settingsmenu.hideSettingsMenuFilterPatch
+import io.github.nexalloy.morphe.music.layout.hide.notifications.hideNotificationsPatch
+import io.github.nexalloy.morphe.music.layout.orientation.forcePortraitOrientationPatch
+import io.github.nexalloy.morphe.music.interaction.audioducking.disableAudioDuckingPatch
+import io.github.nexalloy.morphe.music.misc.spoof.spoofVideoStreamsPatch
 
 val YTMusicPatches = arrayOf(
     ExtensionResourceHook,
@@ -67,6 +81,20 @@ val YTMusicPatches = arrayOf(
     returnYouTubeDislikePatch,
     musicSponsorBlockPatch,
     queueLikeFilterPatch,
+    hideMusicActionButtonsPatch,
+    hideFlyoutMenuComponentsPatch,
+    hideLayoutComponentsPatch,
+    appleMusicArtworkPatch,
+    hideSettingsMenuFilterPatch,
+    hideNotificationsPatch,
+    disableAudioDuckingPatch,
+    forcePortraitOrientationPatch,
+    spoofVideoStreamsPatch,
+    changeMiniplayerColorPatch,
+    enableForcedMiniplayerPatch,
+    enableSwipeToDismissMiniplayerPatch,
+    miniplayerPreviousNextButtonsPatch,
+    lyricsPatch,
     // All patches must add their preferences before SettingsHook closes the screens.
     SettingsHook
 )

@@ -151,6 +151,13 @@ object PreferenceScreen : BasePreferenceScreen() {
         iconBold = "@drawable/morphe_settings_screen_01_ads_bold",
         layout = "@layout/morphe_preference_with_icon"
     )
+    val FEED = Screen(
+        key = "morphe_settings_music_screen_02_feed",
+        summaryKey = null,
+        icon = "@drawable/morphe_settings_screen_03_feed",
+        iconBold = "@drawable/morphe_settings_screen_03_feed_bold",
+        layout = "@layout/morphe_preference_with_icon"
+    )
     val GENERAL = Screen(
         key = "morphe_settings_music_screen_03_general",
         summaryKey = null,

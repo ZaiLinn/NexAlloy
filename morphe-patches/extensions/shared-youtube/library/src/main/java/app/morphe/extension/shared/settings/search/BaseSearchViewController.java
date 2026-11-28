@@ -30,6 +30,7 @@ import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowInsets;
+import android.view.Window;
 import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -91,6 +92,9 @@ public abstract class BaseSearchViewController {
     protected Object nativeBackCallback;
     protected final SearchHistoryManager searchHistoryManager;
     protected SearchView searchView;
+    protected final View searchRoot;
+    protected final Window searchWindow;
+    private final Runnable navigateUp;
 
     /**
      * The query the result rows highlight, or null when nothing is being searched.
@@ -131,9 +135,19 @@ public abstract class BaseSearchViewController {
      * @param fragment The preference fragment to manage search preferences.
      */
     protected BaseSearchViewController(Activity activity, Toolbar toolbar, BasePreferenceFragment fragment) {
+        this(activity, toolbar, fragment, activity.getWindow().getDecorView(), activity.getWindow(),
+                () -> BaseActivityHook.closeSettings(activity));
+    }
+
+    /** Also supports settings hosted in a DialogFragment instead of the activity content. */
+    protected BaseSearchViewController(Activity activity, Toolbar toolbar, BasePreferenceFragment fragment,
+                                       View searchRoot, Window searchWindow, Runnable navigateUp) {
         this.activity = activity;
         this.toolbar = toolbar;
         this.fragment = fragment;
+        this.searchRoot = searchRoot;
+        this.searchWindow = searchWindow;
+        this.navigateUp = navigateUp;
         this.originalTitle = toolbar.getTitle();
         this.allSearchItems = new ArrayList<>();
         this.filteredSearchItems = new ArrayList<>();
@@ -157,13 +171,13 @@ public abstract class BaseSearchViewController {
      */
     private void initializeSearchView() {
         // Retrieve SearchView and container from XML.
-        searchView = activity.findViewById(ID_MORPHE_SEARCH_VIEW);
+        searchView = searchRoot.findViewById(ID_MORPHE_SEARCH_VIEW);
         EditText searchEditText = searchView.findViewById(ResourceUtils.getIdentifierOrThrow(
                 null, "android:id/search_src_text"));
         // Disable fullscreen keyboard mode.
         searchEditText.setImeOptions(searchEditText.getImeOptions() | EditorInfo.IME_FLAG_NO_EXTRACT_UI);
 
-        searchContainer = activity.findViewById(ID_MORPHE_SEARCH_VIEW_CONTAINER);
+        searchContainer = searchRoot.findViewById(ID_MORPHE_SEARCH_VIEW_CONTAINER);
 
         // Set background and query hint.
         searchView.setBackground(createBackgroundDrawable());
@@ -235,7 +249,7 @@ public abstract class BaseSearchViewController {
                 FrameLayout.LayoutParams.MATCH_PARENT));
 
         // Add overlay to the main content container.
-        FrameLayout mainContainer = activity.findViewById(ID_MORPHE_SETTINGS_FRAGMENTS);
+        FrameLayout mainContainer = searchRoot.findViewById(ID_MORPHE_SETTINGS_FRAGMENTS);
         if (mainContainer != null) {
             FrameLayout.LayoutParams overlayParams = new FrameLayout.LayoutParams(
                     FrameLayout.LayoutParams.MATCH_PARENT,
@@ -250,6 +264,12 @@ public abstract class BaseSearchViewController {
         PreferenceScreen getPreferenceScreenForSearch();
         View getView();
         Activity getActivity();
+
+        /** Optional navigation for hosts that open categories as fragments. */
+        @Nullable
+        default Runnable getSearchResultNavigation(@Nullable Preference preference, List<String> keys) {
+            return null;
+        }
     }
 
     /**
@@ -327,7 +347,7 @@ public abstract class BaseSearchViewController {
             if (isSearchActive) {
                 closeSearch();
             } else {
-                BaseActivityHook.closeSettings(activity);
+                navigateUp.run();
             }
         });
     }
@@ -494,9 +514,11 @@ public abstract class BaseSearchViewController {
      */
     protected void openSearch() {
         isSearchActive = true;
+        overlayContainer.bringToFront();
         Setting.preferences.preferences.registerOnSharedPreferenceChangeListener(preferenceChangeListener);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && nativeBackCallback == null) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && nativeBackCallback == null
+                && searchWindow == activity.getWindow()) {
             nativeBackCallback = PredictiveBackHandler.register(activity, this::handleBackPress);
         }
 
@@ -505,7 +527,7 @@ public abstract class BaseSearchViewController {
         searchContainer.setVisibility(View.VISIBLE);
         searchView.requestFocus();
         // Configure soft input mode to adjust layout and show keyboard.
-        activity.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN
+        searchWindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN
                 | WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
         inputMethodManager.showSoftInput(searchView, InputMethodManager.SHOW_IMPLICIT);
         // Always show search history when opening search.
@@ -537,7 +559,7 @@ public abstract class BaseSearchViewController {
         searchView.setQuery("", false);
         // Hide keyboard and reset soft input mode.
         inputMethodManager.hideSoftInputFromWindow(searchView.getWindowToken(), 0);
-        activity.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
+        searchWindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
         currentQueryPattern = null;
 
         searchResultsAdapter.notifyDataSetChanged();
@@ -614,7 +636,7 @@ public abstract class BaseSearchViewController {
 
         boolean isKeyboardVisible = false;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            WindowInsets insets = activity.getWindow().getDecorView().getRootWindowInsets();
+            WindowInsets insets = searchRoot.getRootWindowInsets();
             if (insets != null) {
                 isKeyboardVisible = insets.isVisible(WindowInsets.Type.ime());
             }
@@ -633,6 +655,18 @@ public abstract class BaseSearchViewController {
      */
     public boolean isSearchActive() {
         return isSearchActive;
+    }
+
+    /** Releases listeners when a settings dialog or its view is destroyed. */
+    public void destroy() {
+        if (isSearchActive) closeSearch();
+        searchView.setOnQueryTextListener(null);
+        searchMenuItem.setOnMenuItemClickListener(null);
+        allSearchItems.clear();
+        keyToSearchItem.clear();
+        if (overlayContainer.getParent() instanceof android.view.ViewGroup parent) {
+            parent.removeView(overlayContainer);
+        }
     }
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)

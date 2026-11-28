@@ -1003,4 +1003,8 @@ Second \"item\" text"</string>
   <!-- misc.spoof.appversion.spoofAppVersionPatch -->
   <string name="morphe_music_spoof_app_version_target_entry_8_23_51">8.23.51 - 停用粗體圖示</string>
   <string name="morphe_music_spoof_app_version_target_entry_9_13_51">9.13.51 - 恢復播放器「接下來播放」、「歌詞」和「相關」標籤</string>
+    <string name="morphe_music_lyrics_track_offset_title">歌詞偏移</string>
+    <string name="morphe_music_lyrics_track_offset_earlier">提前 · 100 毫秒</string>
+    <string name="morphe_music_lyrics_track_offset_later">延後 · 100 毫秒</string>
+    <string name="morphe_music_lyrics_track_offset_reset">重設目前歌曲</string>
 </resources>

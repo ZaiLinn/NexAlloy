@@ -1037,14 +1037,20 @@ public final class LyricsPanelView extends FrameLayout
     private void showOffsetRuler() {
         handler.removeCallbacks(hideOffsetRulerRunnable);
         offsetRulerView.setOffsetMs(LyricsManager.getInstance().getTemporaryOffsetMs());
-        if (buttonRow.getVisibility() == VISIBLE && offsetState.hideButtonRowForOffset()) {
-            buttonRow.setVisibility(GONE);
-        }
-        offsetSliderBarView.bringToFront();
-        if (offsetSliderBarView.getVisibility() != VISIBLE) {
-            offsetSliderBarView.setAlpha(0f);
-            offsetSliderBarView.setVisibility(VISIBLE);
-            offsetSliderBarView.animate().alpha(1f).setDuration(200).start();
+        // Saved offsets and dialog edits only update the value. The swipe instructions
+        // must not hide the toolbar unless a swipe or a recording is actually in progress.
+        if (offsetState.isOffsetAdjusting() || offsetState.isRecording()) {
+            if (buttonRow.getVisibility() == VISIBLE && offsetState.hideButtonRowForOffset()) {
+                buttonRow.setVisibility(GONE);
+            }
+            offsetSliderBarView.bringToFront();
+            if (offsetSliderBarView.getVisibility() != VISIBLE) {
+                offsetSliderBarView.setAlpha(0f);
+                offsetSliderBarView.setVisibility(VISIBLE);
+                offsetSliderBarView.animate().alpha(1f).setDuration(200).start();
+            }
+        } else {
+            hideOffsetHintOnly();
         }
         if (offsetRulerView.getVisibility() != VISIBLE) {
             offsetRulerView.setAlpha(0f);
@@ -6206,6 +6212,16 @@ public final class LyricsPanelView extends FrameLayout
                     return true;
                 },
                 true);
+        TextView offsetButton = createToolbarButton(buttonRow, true,
+                "morphe_lyrics_offset",
+                view -> LyricsOffsetDialog.show(view, this::applyButtonStyle),
+                view -> {
+                    LyricsManager manager = LyricsManager.getInstance();
+                    manager.setTemporaryOffsetMs(0);
+                    manager.persistTemporaryOffsetMs();
+                    return true;
+                }, true);
+        offsetButton.setContentDescription(str("morphe_music_lyrics_track_offset_title"));
         normalizeButtonRowSpacing();
     }
 

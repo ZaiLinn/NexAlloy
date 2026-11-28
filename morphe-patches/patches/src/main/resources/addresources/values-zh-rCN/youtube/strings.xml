@@ -1264,6 +1264,10 @@ Second \"item\" text"</string>
   <string name="morphe_hide_toolbar_companion_button_title">隐藏“同伴”按钮</string>
   <string name="morphe_hide_toolbar_microphone_button_title">隐藏麦克风按钮</string>
   <string name="morphe_hide_toolbar_search_button_title">隐藏搜索按钮</string>
+  <string name="morphe_hide_toolbar_notification_button_title">隐藏工具栏“通知”按钮</string>
+  <string name="morphe_hide_toolbar_notification_button_summary">隐藏工具栏右上角的通知铃铛。</string>
+  <string name="morphe_hide_toolbar_notification_button_dot_title">隐藏“通知”按钮红点</string>
+  <string name="morphe_hide_toolbar_notification_button_dot_summary">隐藏工具栏通知铃铛上的新内容红点。</string>
   <string name="morphe_toolbar_buttons_order_title">工具栏按钮顺序</string>
   <string name="morphe_toolbar_buttons_order_summary">拖动按钮以更改它们在工具栏中的顺序</string>
   <!-- layout.hide.endscreencards.hideEndScreenCardsPatch -->
