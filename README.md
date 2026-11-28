@@ -30,64 +30,185 @@
 ## Patches
 
 ### YouTube
-- Remove ads
+
+**Ads & privacy**
+- Remove ads (with AI channel filtering and reporting, AiSList)
 - SponsorBlock
 - Return YouTube Dislike
 - DeArrow (alternative titles and thumbnails)
 - Remove background playback restrictions
-- AI channel filtering and reporting (AiSList)
+- Sanitize sharing links (remove tracking query parameters)
+- Bypass link redirects
+- Open links externally
+- Open system share sheet
+- Disable QUIC protocol
+- Spoof device dimensions
+
+**Playback & video**
+- Remember video quality changes; show video quality button; show advanced video quality menu; hide Premium video quality label
+- Custom playback speed; remember playback speed; playback speed dialog button; replay slower on double-tap
+- Force original audio track
+- Disable video codecs
+- Disable DRC audio
+- Skip silence
+- Playback buffer settings
+- Remember live stream position
+- Autoplay control
+- Disable playlist autoplay / reverse playlist autoplay
+
+**Player & interaction**
 - Add to queue
 - Swipe controls
-- Seekbar
-- Remove share links tracking query parameter
-- Open system share sheet
-- Hide and change navigation buttons
-- Remember video quality changes
-- Show video quality button
-- Show advanced video quality menu
-- Copy video url video player button
+- Seekbar with custom thumb
+- Copy video url player button
 - Copy video titles and comments
 - Open external downloader app
-- Custom playback speed
-- Remember playback speed
-- Playback speed dialog button
-- Hide layout components
-- Hide feed flyout menu items
-- Hide video action buttons
-- Disable Shorts resuming on startup
-- Disable video codecs
+- Download post images, translate posts
+- Reload video button
+- Disable haptic feedback
+- Disable chapter skip on double-tap
+- Disable "Continue watching" prompt
+- Remove viewer discretion dialog
+- Skip live Shorts
+- Fullscreen video scale
+- Custom player overlay opacity
+- Glass-style menus, snackbar tweaks
+- App refresh rate
+
+**Captions**
 - Disable auto captions
-- Bypass image region restrictions
+- Preferred caption language
+- Auto-translate captions, translated caption pens
+- Captions in PiP
+- Copy transcript / show transcript
+- Stable caption blocks, captions after seek
+
+**Layout & hiding**
+- Hide layout components
+- Hide video action buttons
+- Hide and change navigation buttons
+- Change header
+- Wide search bar
+- Hide Shorts components; disable Shorts resuming on startup; Shorts autoplay control; open Shorts in regular player
+- Hide update screen; disable layout updates
+- Hide status bar
+- Hide timestamp, end screen cards, end screen suggested video, info cards, autoplay preview, rolling number animation
+- Hide player popup panels, player overlay buttons, player flyout menu items, related video overlay, ambient mode
+- Hide settings menu items, sign-in to TV popup
+- Hide related videos
+- Live chat translate
+
+**Feed & navigation**
+- Feed card layout
+- Playback in feeds
+- Disable auto feed refresh
+- Disable scrolling speed limit
+- Restore original titles
 - Change start page
 - Channel search
 - Channel whitelist
-- Disable scrolling speed limit
-- Playback in feeds
-- Disable auto feed refresh
-- Restore original titles
-- Open Shorts in regular player
+- Bypass image region restrictions
+
+**Fixes**
+- Back-to-exit gesture, like button, media session stop, delayed ping crash, PiP chat bar, playback speed while playing
 
 ### YouTube Music
+
+**Ads & privacy**
 - Remove music video ads
 - Remove background playback restrictions
-- Hide upgrade button
-- Hide 'Get Music Premium' label
+- Hide upgrade button, 'Get Music Premium' label
+- Sanitize sharing links
+- Open system share sheet
+- Disable QUIC protocol
+
+**Playback & audio**
 - Enable exclusive audio playback
-- Download songs, albums, and playlists, with external downloader and export options
-- Lyrics enhancements (Apple Music-style lyrics, offset adjustment)
-- Audio ducking
-- Crossfade
+- Skip silence
+- Disable DRC audio
+- Force original audio
+- Crossfade between tracks
+- Disable audio ducking
+- Pause playback when muted
+- Loop playback
 - Remember repeat and shuffle state
 - Disable swipe to change track in the player and miniplayer
 - Disable skipping to the next track when disliking a song
-- Pause playback when muted
+- Queue like filter
+- Spoof video streams
+- Change start page
+- Disable auto captions
+
+**Downloads & features**
+- Download songs, albums, and playlists, with external downloader and export options
+- Play album songs
+- Audio/video switch
+
+**Integrations**
+- SponsorBlock
+- Return YouTube Dislike
+
+**Lyrics**
+- Lyrics enhancements (Apple Music-style lyrics, offset adjustment)
+
+**Layout & hiding**
+- Apple Music-style artwork
+- Miniplayer: custom color, forced miniplayer, swipe to dismiss, previous/next buttons
+- Hide layout components
+- Hide music action buttons
+- Hide flyout menu components
+- Hide settings menu items
 - Hide notifications
-- Layout tweaks (miniplayer, navigation buttons, orientation)
+- Hide and change navigation buttons
+- Force portrait orientation
 
 ### Reddit
+
+**Core (all supported versions)**
 - Hide ads
 - Sanitize sharing links
 - Start as guest
+
+**Feed** (full feature set)
+- Disable home feed auto refresh
+- Disable refresh on back
+- Keep feed position
+- Disable post detail swipe
+- Disable bottom bar auto hide
+- Keyword filters, flair filters
+- Feed auto scroll
+- Feed media max height, full-width feed media
+- Show flairs in home feed
+
+**Hiding** (full feature set)
+- Hide navigation buttons, sidebar components, post buttons
+- Hide comment flairs and badges, AutoModerator comments
+- Colorize comment indent lines
+- Hide community highlights, community menu badge, communities shelf, trending shelves
+- Hide interactive posts, related posts section
+- Hide answers preview, ask button, "People also search for", Reddit search
+- Settings in sidebar
+- Hide premium upsells
+
+**Interaction** (full feature set)
+- Remember collapsed comments
+- Full-screen reply
+- Search hidden profiles
+- Swipe up for comments
+- Media viewer: keep in subreddit, hide components, black background, fade
+- Redgifs audio
+- High-quality avatars
+- Remove subreddit dialog
+- Disable screenshot popup
+
+**Misc** (full feature set)
+- Download location
+- Share post content, copy text
+- Customize post layout
+- Open links directly / externally, system share sheet
+- App icon, custom font, force system font
+- Post side panel
+- Debugging
 
 ### Google Photos
 - Spoof Pixel XL (unlock device-specific features)
