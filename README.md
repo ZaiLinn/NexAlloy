@@ -1,40 +1,32 @@
 <div align="center">
   <h1>NexAlloy</h1>
-  <a href="https://discord.gg/QWUrAA2mKq"><img alt="Discord Server" src="https://img.shields.io/badge/Discord%20Server-5865F2.svg?logo=discord&logoColor=white"></a>
-  <a href="https://t.me/revancedxposed"><img alt="Telegram Channel" src="https://img.shields.io/badge/Telegram_Channel-blue.svg?logo=telegram&logoColor=white"></a>
-  <a href="https://github.com/NexAlloy/NexAlloy/releases/latest"><img alt="GitHub Downloads" src="https://img.shields.io/endpoint?url=https%3A%2F%2Fshields.chsbuffer.workers.dev%2F%3Frepos%3DNexAlloy%2FNexAlloy%26cacheSeconds%3D3600"></a>
-  <a href="https://github.com/NexAlloy/NexAlloy"><img alt="GitHub Stars" src="https://img.shields.io/github/stars/NexAlloy/NexAlloy"></a>  
+  <img alt="License" src="https://img.shields.io/badge/License-GPL--3.0-blue.svg">
+  <a href="https://github.com/LSPosed/LSPosed"><img alt="LSPosed" src="https://img.shields.io/badge/Requires-LSPosed-8700ff.svg"></a>
+  <a href="https://github.com/ZaiLinn/NexAlloy"><img alt="GitHub Stars" src="https://img.shields.io/github/stars/ZaiLinn/NexAlloy"></a>
   <br>
 </div>
 
-**ChsBuffer's LSPosed module, powered by Morphe, ReVanced, and beyond.**  
-> [!CAUTION]
-> **Migration Notice:** This project has evolved from **ReVancedXposed** to **NexAlloy**. 
-> 
-> **Upgrading:** We’ve kept the original Package ID for your convenience. You can install this as an update, but **you must manually export your settings from the old version and import them into the new one** to keep your configuration.
+**ZaiLinn's personal fork of [NexAlloy](https://github.com/NexAlloy/NexAlloy) — an LSPosed runtime module, powered by Morphe, ReVanced, and beyond.**
+
+> [!NOTE]
+> **Source-only fork.** This repository publishes **source code only** — no prebuilt APKs or releases are provided here. Build it yourself (see [Building](#building)).
 
 >[!IMPORTANT]  
 > - This is **NOT an official Morphe or ReVanced project**, do not ask their developers for help.  
-> - **Root access** is strictly **required** to use this module!
-> - **Having issues?** Check the **[FAQ](https://github.com/NexAlloy/NexAlloy/wiki/Frequently-Asked-Questions)** before reporting.
+> - **Root access** with an **LSPosed-compatible framework** is strictly **required** to use this module!  
+> - This is an Xposed-style **runtime hook module**, not a patcher/build-time patch framework.  
 
-## Downloads
+## Supported apps
 
-- **Release build**: [Download](https://github.com/NexAlloy/NexAlloy/releases/latest)
-- **Nightly build**: [Download](https://github.com/NexAlloy/NexAlloy/releases/tag/autobuild)
-
-<sub>If you've joined the YouTube beta program, please try the nightly build before reporting an issue.</sub>
-
-> [!TIP]
-> **Volunteers wanted:** Help test [nightly builds](https://nightly.link/NexAlloy/NexAlloy/workflows/android/main)
-> and [report crashes, regressions, or broken patches](https://github.com/NexAlloy/NexAlloy/issues/new/choose).
-> Use the [debug build](https://nightly.link/NexAlloy/NexAlloy/workflows/android/main/nexalloy-ci-debug-apk.zip) when reporting issues.
-> Your feedback helps us catch issues before release and improve the quality of stable builds.
+| App | Package |
+| --- | --- |
+| YouTube | `com.google.android.youtube` |
+| YouTube Music | `com.google.android.apps.youtube.music` |
+| Reddit | `com.reddit.frontpage` |
 
 ## Patches
 
 ### YouTube
-
 - Remove ads
 - SponsorBlock
 - Return YouTube Dislike
@@ -79,32 +71,52 @@
 - Hide 'Get Music Premium' label
 - Enable exclusive audio playback
 - Download songs, albums, and playlists, with external downloader and export options
+- Lyrics enhancements (Apple Music-style lyrics, offset adjustment)
+- Audio ducking
+- Crossfade
 - Remember repeat and shuffle state
 - Disable swipe to change track in the player and miniplayer
 - Disable skipping to the next track when disliking a song
 - Pause playback when muted
+- Hide notifications
+- Layout tweaks (miniplayer, navigation buttons, orientation)
 
 ### Reddit
 - Hide ads
 - Sanitize sharing links
 - Start as guest
 
-### Google Photos
-- Spoof Pixel XL
+## Building
 
-### Instagram
-- Hide ads
+Requirements: Android SDK, JDK 17+.
 
-### Threads
-- Hide ads
+```bash
+./gradlew assembleRelease
+```
 
-## Supports
-[![Discord Server](https://img.shields.io/badge/Join-Discord-5865F2.svg?logo=discord)](https://discord.gg/QWUrAA2mKq)  
-[![FAQ](https://img.shields.io/badge/Read-FAQ-orange.svg?logo=github)](https://github.com/NexAlloy/NexAlloy/wiki/Frequently-Asked-Questions)  
-or [Create an issue](https://github.com/NexAlloy/NexAlloy/issues/new/choose)
+- Output: `app/build/outputs/apk/release/app-release.apk`
+- Release signing is configured via a `signing.properties` file at the repo root (see `app/build.gradle.kts` for the expected keys). Without it, configure your own signing config.
+- The LSPosed module ID is `io.github.zailinn.nexalloy`; enable it for the apps listed above and reboot.
+
+### Fingerprint tests
+
+The module locates hooks with [DexKit](https://luckypray.org/DexKit/en/) fingerprints, which are verified against real APKs placed in `app/binaries/` (not included in this repository):
+
+```bash
+./gradlew :app:testDebugUnitTest
+```
+
+## Development
+
+See [DEVELOPMENT.md](DEVELOPMENT.md) for the project structure and patch conventions.
 
 ## ⭐ Credits
 
+[NexAlloy](https://github.com/NexAlloy/NexAlloy): the upstream project this fork continues (itself evolved from ReVancedXposed).  
 [DexKit](https://luckypray.org/DexKit/en/): a high-performance dex runtime parsing library.  
 [Morphe](https://morphe.software): Transform Your Android Apps  
 [ReVanced](https://revanced.app): Continuing the legacy of Vanced at [revanced.app](https://revanced.app)
+
+## License
+
+GPL-3.0 — see [LICENSE](LICENSE).
